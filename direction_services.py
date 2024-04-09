@@ -1,10 +1,15 @@
+from graph_data import Vertexes
+
+
 class Turtle:
 
-    def __init__(self, init_pos, x2, y2):
-        self.__curpos = init_pos
+    def __init__(self, init_pos: str, x2, y2):
+        self.__pos_name = init_pos
+        self.__curpos = Vertexes[init_pos]
         self.__dir = find_direction(self.__curpos['x'], x2, self.__curpos['y'], y2)
 
-    def set_transition(self, pos):
+    def set_transition(self, pos_name):
+        pos = Vertexes[pos_name]
         x1, x2, y1, y2 = self.__curpos['x'], pos['x'], self.__curpos['y'], pos['y']
         new_direction = find_direction(x1,x2,y1,y2)
         res = 'f'
@@ -53,3 +58,10 @@ def is_3_14dor(dir1, dir2):
             return True
         else:
             return False
+
+def count_neighbour_hallways(node):
+    count = 0
+    for n in map(lambda x: Vertexes[x[0]],node['neighborData']):
+        if n['type'] == 'hallway':
+            count += 1
+    return count
