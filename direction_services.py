@@ -20,6 +20,7 @@ class Turtle:
                 res = 'r'
             self.__dir = new_direction
         self.__curpos = pos
+        self.__pos_name = pos_name
         return res
 
 def find_direction(x1, x2, y1, y2):

@@ -16,7 +16,38 @@ def get_route(from_point: str, to_point: str):
     except:
         return False
 
+def is_more_than_2_turns(l):
+    count = 0
+    for m in l:
+        if m == 'tr' or m == 'tl':
+            count+=1
+            if count > 1:
+                return True
+    return False
 
+
+def generate_str(route_list):
+    string = ''
+    for i in range(len(route_list)):
+        move = route_list[i]
+        if move == 'tl':
+            if i == len(route_list) - 1:
+                string += 'аудитория будет слева'
+            else:
+                string += 'поверните налево, '
+        elif move == 'tr':
+            if i == len(route_list) - 1:
+                string += 'аудитория будет справа'
+            else:
+                string += 'поверните направо, '
+        elif move == 'gf' and route_list[i-1] != 'gf':
+            string += 'идите прямо, '
+            if is_more_than_2_turns(route_list[i:]):
+                string += 'до следующего поворота, '
+        elif move == 'gfs':
+            if not route_list[i+1] in ('tl', 'tr'):
+                string += 'пропустите поворот, '
+    return string
 
 def tell_route(from_p: str, to_p: str):
     way = get_route(from_p, to_p)
@@ -34,12 +65,12 @@ def tell_route(from_p: str, to_p: str):
         elif res == 'r':
             route_list.append('tr')
         elif res == 'f' and route_list:
-            if hallways_neighbor_amount == 4:
+            if hallways_neighbor_amount >= 3:
                 route_list.append('gfs')
             else:
                 route_list.append('gf')
 
-    return route_list
+    return generate_str(route_list)
 
 
 
