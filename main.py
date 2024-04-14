@@ -54,7 +54,7 @@ def generate_str(route_list):
                 if spl[0] == 'st':
                     string += 'идите на лестницу и '
             stages_history.append(int(spl[1]))
-            if len(stages_history) > 1:
+            if len(stages_history) > 1 and len(stages_history)%2 == 0:
                 if stages_history[-1] > stages_history[-2]:
                     string += f'поднимитесь на {stages_history[-1]} этаж, '
                 else:
