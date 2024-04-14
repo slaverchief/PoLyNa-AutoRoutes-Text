@@ -28,6 +28,7 @@ def is_more_than_2_turns(l):
 
 def generate_str(route_list):
     string = ''
+    stages_history = []
     for i in range(len(route_list)):
         move = route_list[i]
         if move == 'tl':
@@ -47,6 +48,18 @@ def generate_str(route_list):
         elif move == 'gfs':
             if not route_list[i+1] in ('tl', 'tr'):
                 string += 'пропустите поворот, '
+        elif move != 'gf':
+            spl = move.split('_')
+            if not stages_history or len(stages_history)%2 == 0:
+                if spl[0] == 'st':
+                    string += 'идите на лестницу и '
+            stages_history.append(int(spl[1]))
+            if len(stages_history) > 1:
+                if stages_history[-1] > stages_history[-2]:
+                    string += f'поднимитесь на {stages_history[-1]} этаж, '
+                else:
+                    string += f'спуститесь на {stages_history[-1]} этаж, '
+
     return string
 
 def tell_route(from_p: str, to_p: str):
@@ -69,6 +82,11 @@ def tell_route(from_p: str, to_p: str):
                 route_list.append('gfs')
             else:
                 route_list.append('gf')
+        elif res != 'f':
+            spl = res.split('_')
+            if spl[0] == 'uds':
+                route_list.append(f'st_{spl[1]}')
+
 
     return generate_str(route_list)
 

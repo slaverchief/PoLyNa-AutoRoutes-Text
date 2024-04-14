@@ -13,7 +13,9 @@ class Turtle:
         x1, x2, y1, y2 = self.__curpos['x'], pos['x'], self.__curpos['y'], pos['y']
         new_direction = find_direction(x1,x2,y1,y2)
         res = 'f'
-        if self.__dir != new_direction:
+        if pos['type'] == 'stair':
+            res = 'uds_' + (pos_name.split('-')[1])
+        elif self.__dir != new_direction:
             if is_3_14dor(self.__dir, new_direction):
                 res = 'l'
             else:
