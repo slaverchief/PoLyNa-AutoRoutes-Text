@@ -1,20 +1,18 @@
-import selenium
-from selenium import webdriver
-from graph_data import Vertexes
+from graph_data import Vertexes, auditoriumsRusNames as rusnames
 from direction_services import *
+from selenium import webdriver
+import selenium
 
 chrome_options = selenium.webdriver.ChromeOptions()
 chrome_options.add_argument('headless')
-driver = selenium.webdriver.Chrome(options = chrome_options)
+driver = selenium.webdriver.Chrome(options=chrome_options)
 
 def get_route(from_point: str, to_point: str):
+
     driver.get('https://mospolynavigation.github.io/nav2/')
     command = f'return graph.getShortestWayFromTo("{from_point}","{to_point}")'
-    try:
-        res = driver.execute_script(command)
-        return res['way']
-    except:
-        return False
+    res = driver.execute_script(command)
+    return res['way']
 
 def is_more_than_2_turns(l):
     count = 0
@@ -62,7 +60,11 @@ def generate_str(route_list):
 
     return string
 
-def tell_route(from_p: str, to_p: str):
+def tell_route(from_p_rus: str, to_p_rus: str):
+    try:
+        from_p, to_p = get_eng_name(from_p_rus), get_eng_name(to_p_rus)
+    except Exception as ex:
+        return f"Error: {ex}"
     way = get_route(from_p, to_p)
     if not way:
         return False
@@ -90,20 +92,8 @@ def tell_route(from_p: str, to_p: str):
 
     return generate_str(route_list)
 
-
-
-
-if __name__ == '__main__':
-    while True:
-        print("Enter the FROM point")
-        from_p = input()
-        print("Enter the TO point")
-        to_p = input()
-        res = tell_route(from_p, to_p)
-        if res:
-            print(res)
-
-
-
-
-
+def get_eng_name(p_rus):
+    for pair in rusnames:
+        if pair[1] == p_rus:
+            return pair[0]
+    raise Exception(f"There is no auditorium with name {p_rus}")
