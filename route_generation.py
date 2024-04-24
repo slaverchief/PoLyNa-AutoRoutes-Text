@@ -30,8 +30,8 @@ class RouteMaker:
                 count += 1
         return count
 
-
-    def __format_route(self, l):
+    @staticmethod
+    def format_route(l):
         is_cross_staging = False
         i = 0
         while i != len(l):
@@ -49,26 +49,29 @@ class RouteMaker:
             i += 1
         return l
 
-
     def __get_route(self, from_point: str, to_point: str):
 
-        command = f'return graph.getShortestWayFromTo("{from_point}","{to_point}")'
-        res = self.__driver.execute_script(command)
-        return self.__format_route(res['way'])
+        try:
+            command = f'return graph.getShortestWayFromTo("{from_point}","{to_point}")'
+            res = self.__driver.execute_script(command)
+            return RouteMaker.format_route(res['way'])
+        except:
+            raise Exception('Ошибка во время запроса маршрута, возможно вы указали некорректное название аудитории')
 
-    def __waiting_for_the_turn(self, l):
+    @staticmethod
+    def waiting_for_the_turn(l):
         count = 0
         for m in l:
             if m == 'gfs':
                 return False
             if m == 'tr' or m == 'tl':
-                count+=1
+                count += 1
                 if count > 1:
                     return True
         return False
 
-
-    def __generate_str(self, route_list, to_p):
+    @staticmethod
+    def generate_str(route_list, to_p):
         string = ''
         stages_history = []
 
@@ -90,7 +93,7 @@ class RouteMaker:
                     string += 'поверните направо, '
             elif move == 'gf' and route_list[i-1] != 'gf':
                 string += 'идите прямо, '
-                if self.__waiting_for_the_turn(route_list[i:]):
+                if RouteMaker.waiting_for_the_turn(route_list[i:]):
                     string += 'до следующего поворота, '
             elif move == 'gfs':
                 if skip_a_turn(route_list[i+1]):
@@ -99,7 +102,7 @@ class RouteMaker:
                 spl = move.split('_')
                 if not stages_history or len(stages_history)%2 == 0:
                     if spl[0] == 'st':
-                        string += 'до лестницы и'
+                        string += 'до лестницы и '
                 stages_history.append(int(spl[1]))
                 if len(stages_history) > 1 and len(stages_history)%2 == 0:
                     if stages_history[-1] > stages_history[-2]:
@@ -141,7 +144,7 @@ class RouteMaker:
                     route_list.append(f'st_{spl[1]}')
 
 
-        return self.__generate_str(route_list, to_p)
+        return RouteMaker.generate_str(route_list, to_p)
 
     # def __get_eng_name(self, p_rus):
     #     for pair in self.__rusnames:

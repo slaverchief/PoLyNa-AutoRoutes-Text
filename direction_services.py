@@ -10,8 +10,7 @@ class Turtle:
             if v['id'] == init_pos:
                 self.__curpos = v
                 break
-        self.__dir = self.__find_direction(self.__curpos['x'], x2, self.__curpos['y'], y2)
-
+        self.__dir = Turtle.find_direction(self.__curpos['x'], x2, self.__curpos['y'], y2)
 
     def __reverse_direction(self):
         if self.__dir == 'w':
@@ -33,7 +32,7 @@ class Turtle:
         new_direction = None
         if not self.__stair_passed_flag:
             x1, x2, y1, y2 = self.__curpos['x'], pos['x'], self.__curpos['y'], pos['y']
-            new_direction = self.__find_direction(x1,x2,y1,y2)
+            new_direction = Turtle.find_direction(x1,x2,y1,y2)
         else:
             self.__reverse_direction()
         res = 'f'
@@ -43,9 +42,9 @@ class Turtle:
                 self.__stair_passed_flag = True
             else:
                 self.__stair_passed_flag = False
-        if self.__dir != new_direction and new_direction != None:
+        if self.__dir != new_direction and new_direction:
             if pos['type'] != 'stair':
-                if self.__is_3_14dor(self.__dir, new_direction):
+                if Turtle.is_3_14dor(self.__dir, new_direction):
                     res = 'l'
                 else:
                     res = 'r'
@@ -54,7 +53,9 @@ class Turtle:
         self.__pos_name = pos_name
         return res
 
-    def __find_direction(self, x1, x2, y1, y2):
+
+    @staticmethod
+    def find_direction(x1, x2, y1, y2):
         direction = None
 
         if x1 != x2:
@@ -69,7 +70,9 @@ class Turtle:
                 direction = 'n'
         return direction
 
-    def __is_3_14dor(self, dir1, dir2):
+
+    @staticmethod
+    def is_3_14dor(dir1, dir2):
         if dir1 == 'n':
             if dir2 == 'e':
                 return True
