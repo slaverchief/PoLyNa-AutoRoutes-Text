@@ -1,19 +1,19 @@
-
+from graph_data_BS.graph_data import *
 from direction_services import *
 from selenium import webdriver
 import selenium
 
 
-
 class RouteMaker:
 
-    def __init__(self):
+    def __init__(self, building_name):
         chrome_options = selenium.webdriver.ChromeOptions()
         chrome_options.add_argument('headless')
         self.__driver = selenium.webdriver.Chrome(options=chrome_options)
         self.__driver.get('https://mospolynavigation.github.io/clientNavigation/')
         # self.__rusnames = auditoriumsRusNames
-        self.__vertexes = Vertexes
+        if building_name == 'BS':
+            self.__vertexes = BS_Vertexes
 
     def __del__(self):
         self.__driver.quit()
@@ -56,7 +56,7 @@ class RouteMaker:
             res = self.__driver.execute_script(command)
             return RouteMaker.format_route(res['way'])
         except:
-            raise Exception('Ошибка во время запроса маршрута, возможно вы указали некорректное название аудитории')
+            raise Exception('во время запроса маршрута, возможно вы указали некорректное название начальной и конечной точки')
 
     @staticmethod
     def waiting_for_the_turn(l):
@@ -116,35 +116,36 @@ class RouteMaker:
         try:
             # from_p, to_p = self.__get_eng_name(from_p_rus), self.__get_eng_name(to_p_rus)
             from_p, to_p = from_p_rus, to_p_rus
-        except Exception as ex:
-            return f"Error: {ex}"
-        way = self.__get_route(from_p, to_p)
-        if not way:
-            return False
-        cur_pos = way[0]
-        x1, x2, y1, y2 = self.__vert_get(way[0])['x'], self.__vert_get(way[1])['x'], self.__vert_get(way[0])['y'], self.__vert_get(way[1])['y']
-        t = Turtle(cur_pos, x2, y2, self.__vertexes)
-        route_list = []
-        for i in range(1, len(way)):
-            node = way[i]
-            res = t.set_transition(node)
-            hallways_neighbor_amount = self.__count_neighbour_hallways(self.__vert_get(node))
-            if res == 'l':
-                route_list.append('tl')
-            elif res == 'r':
-                route_list.append('tr')
-            elif res == 'f':
-                if hallways_neighbor_amount >= 3:
-                    route_list.append('gfs')
+
+            way = self.__get_route(from_p, to_p)
+            if not way:
+                return False
+            cur_pos = way[0]
+            x1, x2, y1, y2 = self.__vert_get(way[0])['x'], self.__vert_get(way[1])['x'], self.__vert_get(way[0])['y'], self.__vert_get(way[1])['y']
+            t = Turtle(cur_pos, x2, y2, self.__vertexes)
+            route_list = []
+            for i in range(1, len(way)):
+                node = way[i]
+                res = t.set_transition(node)
+                hallways_neighbor_amount = self.__count_neighbour_hallways(self.__vert_get(node))
+                if res == 'l':
+                    route_list.append('tl')
+                elif res == 'r':
+                    route_list.append('tr')
+                elif res == 'f':
+                    if hallways_neighbor_amount >= 3:
+                        route_list.append('gfs')
+                    else:
+                        route_list.append('gf')
                 else:
-                    route_list.append('gf')
-            else:
-                spl = res.split('_')
-                if spl[0] == 'uds':
-                    route_list.append(f'st_{spl[1]}')
+                    spl = res.split('_')
+                    if spl[0] == 'uds':
+                        route_list.append(f'st_{spl[1]}')
 
 
-        return RouteMaker.generate_str(route_list, to_p)
+            return RouteMaker.generate_str(route_list, to_p)
+        except Exception as ex:
+            return f"Ошибка {ex}"
 
     # def __get_eng_name(self, p_rus):
     #     for pair in self.__rusnames:

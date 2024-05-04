@@ -1,5 +1,3 @@
-from graph_data import Vertexes
-
 
 class Turtle:
     def __init__(self, init_pos: str, x2, y2, vertexes):
