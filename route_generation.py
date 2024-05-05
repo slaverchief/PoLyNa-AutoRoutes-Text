@@ -64,10 +64,12 @@ class RouteMaker:
         for m in l:
             if m == 'gfs':
                 return False
-            if m == 'tr' or m == 'tl':
+            elif m == 'tr' or m == 'tl':
                 count += 1
                 if count > 1:
                     return True
+            elif m.split('_') and m.split('_')[0] == 'st':
+                return False
         return False
 
     @staticmethod
@@ -88,21 +90,26 @@ class RouteMaker:
                     string += 'поверните налево, '
             elif move == 'tr':
                 if i == len(route_list) - 1:
-                    string += f'аудитория {to_p.split('-')[1]} будет справа'
+                    string += f'аудитория {to_p} будет справа'
                 else:
                     string += 'поверните направо, '
-            elif move == 'gf' and route_list[i-1] != 'gf':
+            elif move == 'gf' and route_list[i-1] not in ('gf', 'gfs'):
                 string += 'идите прямо, '
                 if RouteMaker.waiting_for_the_turn(route_list[i:]):
                     string += 'до следующего поворота, '
             elif move == 'gfs':
                 if skip_a_turn(route_list[i+1]):
                     string += 'пропустите поворот, '
+            elif move == 'crs':
+                string += 'перейдите на другой корпус, '
             elif move != 'gf':
                 spl = move.split('_')
                 if not stages_history or len(stages_history)%2 == 0:
                     if spl[0] == 'st':
-                        string += 'до лестницы и '
+                        if route_list[-1] not in ('gf', 'gfs'):
+                            string += 'идите до лестницы и '
+                        else:
+                            string += 'до лестницы и '
                 stages_history.append(int(spl[1]))
                 if len(stages_history) > 1 and len(stages_history)%2 == 0:
                     if stages_history[-1] > stages_history[-2]:
@@ -110,40 +117,51 @@ class RouteMaker:
                     else:
                         string += f'спуститесь на {stages_history[-1]} этаж, '
 
+
+
         return string
+
+    def __generate_route_list(self, from_p_rus: str, to_p_rus: str):
+        # from_p, to_p = self.__get_eng_name(from_p_rus), self.__get_eng_name(to_p_rus)
+        from_p, to_p = from_p_rus, to_p_rus
+
+        way = self.__get_route(from_p, to_p)
+        if not way:
+            return False
+        cur_pos = way[0]
+        x1, x2, y1, y2 = self.__vert_get(way[0])['x'], self.__vert_get(way[1])['x'], self.__vert_get(way[0])['y'], self.__vert_get(way[1])['y']
+        t = Turtle(cur_pos, x2, y2, self.__vertexes)
+        route_list = []
+        is_from_aud = self.__vert_get(way[0]).get('type') == 'entrancesToAu'
+        for i in range(1, len(way)):
+            node = way[i]
+            nodespl = node.split('-')
+            if len(nodespl) == 4 and nodespl[2] == 'crossing':
+                route_list.append('crs')
+                return route_list + self.__generate_route_list(way[i+1], to_p)
+            res = t.set_transition(node)
+            hallways_neighbor_amount = self.__count_neighbour_hallways(self.__vert_get(node))
+            if is_from_aud and i == 1:
+                continue
+            if res == 'l':
+                route_list.append('tl')
+            elif res == 'r':
+                route_list.append('tr')
+            elif res == 'f':
+                if hallways_neighbor_amount >= 3:
+                    route_list.append('gfs')
+                else:
+                    route_list.append('gf')
+            else:
+                spl = res.split('_')
+                if spl[0] == 'uds':
+                    route_list.append(f'st_{spl[1]}')
+        return route_list
+
 
     def tell_route(self, from_p_rus: str, to_p_rus: str):
         try:
-            # from_p, to_p = self.__get_eng_name(from_p_rus), self.__get_eng_name(to_p_rus)
-            from_p, to_p = from_p_rus, to_p_rus
-
-            way = self.__get_route(from_p, to_p)
-            if not way:
-                return False
-            cur_pos = way[0]
-            x1, x2, y1, y2 = self.__vert_get(way[0])['x'], self.__vert_get(way[1])['x'], self.__vert_get(way[0])['y'], self.__vert_get(way[1])['y']
-            t = Turtle(cur_pos, x2, y2, self.__vertexes)
-            route_list = []
-            for i in range(1, len(way)):
-                node = way[i]
-                res = t.set_transition(node)
-                hallways_neighbor_amount = self.__count_neighbour_hallways(self.__vert_get(node))
-                if res == 'l':
-                    route_list.append('tl')
-                elif res == 'r':
-                    route_list.append('tr')
-                elif res == 'f':
-                    if hallways_neighbor_amount >= 3:
-                        route_list.append('gfs')
-                    else:
-                        route_list.append('gf')
-                else:
-                    spl = res.split('_')
-                    if spl[0] == 'uds':
-                        route_list.append(f'st_{spl[1]}')
-
-
-            return RouteMaker.generate_str(route_list, to_p)
+            return RouteMaker.generate_str(self.__generate_route_list(from_p_rus, to_p_rus), to_p_rus)
         except Exception as ex:
             return f"Ошибка {ex}"
 
