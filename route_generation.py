@@ -100,7 +100,7 @@ class RouteMaker:
             elif move == 'gfs':
                 if skip_a_turn(route_list[i+1]):
                     string += 'пропустите поворот, '
-            elif move == 'crs':
+            elif move == 'crs': 
                 string += 'перейдите на другой корпус, '
             elif move != 'gf':
                 spl = move.split('_')
@@ -116,8 +116,6 @@ class RouteMaker:
                         string += f'поднимитесь на {stages_history[-1]} этаж, '
                     else:
                         string += f'спуститесь на {stages_history[-1]} этаж, '
-
-
 
         return string
 
@@ -157,7 +155,6 @@ class RouteMaker:
                 if spl[0] == 'uds':
                     route_list.append(f'st_{spl[1]}')
         return route_list
-
 
     def tell_route(self, from_p_rus: str, to_p_rus: str):
         try:
