@@ -77,10 +77,19 @@ class RouteMaker:
         string = ''
         stages_history = []
 
-        def skip_a_turn(node):
-            if (node in ('tl', 'tr') or (node.split('_') and  node.split('_')[0] == 'st')):
-                return False
-            return True
+        def count_skip_turn(nodes):
+            count = 1
+            tagged_gfs = []
+            if nodes[0] in ('tl', 'tr') or (nodes[0].split('_') and nodes[0].split('_')[0] == 'st'):
+                return 0
+            for j in range(0, len(nodes)):
+                node = nodes[j]
+                if node in ('tl', 'tr') or (node.split('_') and node.split('_')[0] == 'st'):
+                    return count, tagged_gfs
+                elif node == 'gfs':
+                    tagged_gfs.append(j)
+                    count += 1
+
         for i in range(len(route_list)):
             move = route_list[i]
             if move == 'tl':
@@ -98,11 +107,14 @@ class RouteMaker:
                 if RouteMaker.waiting_for_the_turn(route_list[i:]):
                     string += 'до следующего поворота, '
             elif move == 'gfs':
-                if skip_a_turn(route_list[i+1]):
-                    string += 'пропустите поворот, '
+                res = count_skip_turn(route_list[i+1:])
+                if res and res[0]:
+                    string += f'пропустите {res[0]} поворот(а)(ов), '
+                    for index in res[1]:
+                        route_list[index+i+1] = 'gfs_ach'
             elif move == 'crs': 
                 string += 'перейдите на другой корпус, '
-            elif move != 'gf':
+            elif move != 'gf' and move != 'gfs_ach':
                 spl = move.split('_')
                 if not stages_history or len(stages_history)%2 == 0:
                     if spl[0] == 'st':
@@ -157,10 +169,10 @@ class RouteMaker:
         return route_list
 
     def tell_route(self, from_p_rus: str, to_p_rus: str):
-        try:
-            return RouteMaker.generate_str(self.__generate_route_list(from_p_rus, to_p_rus), to_p_rus)
-        except Exception as ex:
-            return f"Ошибка {ex}"
+        # try:
+        return RouteMaker.generate_str(self.__generate_route_list(from_p_rus, to_p_rus), to_p_rus)
+        # except Exception as ex:
+        #     return f"Ошибка {ex}"
 
     # def __get_eng_name(self, p_rus):
     #     for pair in self.__rusnames:
