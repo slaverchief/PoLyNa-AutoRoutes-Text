@@ -14,6 +14,7 @@ class RouteMaker:
         # self.__rusnames = auditoriumsRusNames
         if building_name == 'BS':
             self.__vertexes = BS_Vertexes
+            self.__rusnames = BS_RusNames
 
     def __del__(self):
         self.__driver.quit()
@@ -73,9 +74,10 @@ class RouteMaker:
         return False
 
     @staticmethod
-    def generate_str(route_list, to_p):
+    def generate_str(route_list, to_p_rus):
         string = ''
         stages_history = []
+        to_p = BS_RusNames[to_p_rus]
 
         def count_skip_turn(nodes):
             count = 1
@@ -132,8 +134,7 @@ class RouteMaker:
         return string
 
     def __generate_route_list(self, from_p_rus: str, to_p_rus: str):
-        # from_p, to_p = self.__get_eng_name(from_p_rus), self.__get_eng_name(to_p_rus)
-        from_p, to_p = from_p_rus, to_p_rus
+        from_p, to_p = self.__rusnames[from_p_rus], self.__rusnames[to_p_rus]
 
         way = self.__get_route(from_p, to_p)
         if not way:
@@ -169,15 +170,10 @@ class RouteMaker:
         return route_list
 
     def tell_route(self, from_p_rus: str, to_p_rus: str):
-        # try:
-        return RouteMaker.generate_str(self.__generate_route_list(from_p_rus, to_p_rus), to_p_rus)
-        # except Exception as ex:
-        #     return f"Ошибка {ex}"
+        try:
+            return RouteMaker.generate_str(self.__generate_route_list(from_p_rus, to_p_rus), to_p_rus)
+        except Exception as ex:
+            return f"Возникла ошибка: проверьте корректность ввода данных."
 
-    # def __get_eng_name(self, p_rus):
-    #     for pair in self.__rusnames:
-    #         if pair[1] == p_rus:
-    #             return pair[0]
-    #     raise Exception(f"There is no auditorium with name {p_rus}")
 
 
