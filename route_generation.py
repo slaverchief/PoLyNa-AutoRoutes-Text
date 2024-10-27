@@ -170,10 +170,10 @@ class RouteMaker:
         return route_list
 
     def tell_route(self, from_p_rus: str, to_p_rus: str):
-        try:
-            return RouteMaker.generate_str(self.__generate_route_list(from_p_rus, to_p_rus), to_p_rus)
-        except Exception as ex:
-            return f"Возникла ошибка: проверьте корректность ввода данных."
+        # try:
+        return RouteMaker.generate_str(self.__generate_route_list(from_p_rus, to_p_rus), to_p_rus)
+        # except Exception as ex:
+        #     return f"Возникла ошибка: проверьте корректность ввода данных."
 
 
 

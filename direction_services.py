@@ -1,4 +1,5 @@
 
+
 class Turtle:
     def __init__(self, init_pos: str, x2, y2, vertexes):
         self.__stair_passed_flag = False
